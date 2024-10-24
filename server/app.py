@@ -7,21 +7,17 @@ from functools import wraps
 # Create the Flask application
 app = Flask(__name__)
 
-# Configuration
 class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql://root:ragu 16-10-2004@localhost/admin_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = 'your_secret_key'  # Secret key for JWT
-    JWT_SECRET_KEY = 'your_jwt_secret_key'  # Secret key for JWT
+    SECRET_KEY = 'adminui' 
+    JWT_SECRET_KEY = 'adminuiclimetaverse'
 
-# Load configuration into the app
 app.config.from_object(Config)
 
-# Initialize the database
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
-# Define the unified User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -54,8 +50,8 @@ class Member(db.Model):
     __tablename__ = 'member'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.String(128), nullable=False)  # Hashed password
-    coordinator_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Link to User table
+    password = db.Column(db.String(128), nullable=False)  
+    coordinator_id = db.Column(db.Integer, db.ForeignKey('user.id')) 
 
 def verify_role(required_role):
     def wrapper(fn):
@@ -88,7 +84,6 @@ def register():
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
 
-# --- Organization CRUD Endpoints ---
 
 @app.route('/supersuperadmins/<int:supersuperadmin_id>/organizations', methods=['GET'])
 @verify_role('supersuperadmin')
@@ -126,8 +121,6 @@ def delete_organization(org_id):
     db.session.commit()
     return jsonify({"message": "Organization deleted successfully"}), 204
 
-# --- Branch CRUD Endpoints ---
-
 @app.route('/superadmins/<int:superadmin_id>/branches', methods=['GET'])
 @verify_role('superadmin')
 def get_branches(superadmin_id):
@@ -164,8 +157,6 @@ def delete_branch(branch_id):
     db.session.commit()
     return jsonify({"message": "Branch deleted successfully"}), 204
 
-# --- Department CRUD Endpoints ---
-
 @app.route('/admins/<int:admin_id>/departments', methods=['GET'])
 @verify_role('admin')
 def get_departments(admin_id):
@@ -201,8 +192,6 @@ def delete_department(dept_id):
     db.session.delete(department)
     db.session.commit()
     return jsonify({"message": "Department deleted successfully"}), 204
-
-# --- Member CRUD Endpoints ---
 
 @app.route('/coordinators/<int:coordinator_id>/members', methods=['GET'])
 @verify_role('coordinator')
@@ -243,7 +232,6 @@ def delete_member(member_id):
     db.session.commit()
     return jsonify({"message": "Member deleted successfully"}), 204
 
-# Initialize the database (create tables)
 if __name__ == '__main__':
     db.create_all()
     app.run(debug=True)
